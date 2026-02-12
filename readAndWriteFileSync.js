@@ -1,5 +1,6 @@
 const { log } = require('console');
 const fs = require('fs');
+// blocking
 const textIn = fs.readFileSync('./txt/input.txt','utf-8')
 
 const textOut = `This is what we now avacado: ${textIn}. \nCreated on ${Date.now()}`;
