@@ -1,118 +1,36 @@
 const express = require("express");
 const fs = require("fs");
+const morgan = require("morgan");
 const app = express();
+const tourRoute = require("./routes/tourRoutes")
+const userRouter = require("./routes/userRoutes")
 
+
+// MIDDLEWARE
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev")); // morgan is a HTTP request logger middleware for Express.js applications. It helps you log details of every incoming request to your server. use for debugging ,Monitoring API Activity,Useful in Development
+}
 app.use(express.json()); // convert body in json if not add middleware then body is undefined
+
+// server static file
+app.use(express.static(`${__dirname}/public`)); // serve static file in public folder
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+// morgan very popular middleware for login
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello from server", app: "natours" });
 });
 
-// app.post('/',(req,res) => {
-//     res.status(200).send("youc can post to this endpoint")
-// })
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`),
-);
 
-const getAllTours = (req, res) => {
-  res.status(200).json({
-    success: true,
-    results: tours.length,
-    data: {
-      tours: tours,
-    },
-  });
-}
+// ROUTE HANDLER
 
-const getTour = (req, res) => {
-  const { id: tourId } = req.params; //convert string to numbers thats why multiply by 1
-  const tour = tours.find((tour) => tour.id === tourId * 1);
-  if (!tour) {
-    return res.send(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  }
-
-  res.status(200).json({
-    success: true,
-    data: {
-      tour,
-    },
-  });
-}
-
-const createTour = (req, res) => {
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body);
-  tours.push(newTour);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({
-        status: "success",
-        data: {
-          tour: newTour,
-        },
-      });
-    },
-  );
-}
-
-const updateTour = (req, res) => {
-  const { id: tourId } = req.params; //convert string to numbers thats why multiply by 1
-  const tour = tours.find((tour) => tour.id === tourId * 1);
-  if (!tour) {
-    return res.send(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour: "Updated tour here",
-    },
-  });
-}
-
-const deleteTour = (req, res) => {
-  const { id: tourId } = req.params; //convert string to numbers thats why multiply by 1
-  const tour = tours.find((tour) => tour.id === tourId * 1);
-  if (!tour) {
-    return res.send(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  }
-
-  res.status(204).json({
-    status: "success",
-    data: null
-  });
-}
+app.use("/api/v1/tours",tourRoute)
+app.use("/api/v1/users",userRouter)
 
 
-// app.get("/api/v1/tours", getAllTours);
-
-// app.get("/api/v1/tours/:id", getTour);
-
-// app.post("/api/v1/tours", createTour);
-
-// app.patch("/api/v1/tours/:id", updateTour);
-
-// app.delete("/api/v1/tours/:id", deleteTour);
-
-
-app.route("/api/v1/tours").get(getAllTours).post(createTour)
-app.route("/api/v1/tours/:id").get(getTour).patch(updateTour).delete(deleteTour)
-
-
-// listen
-const port = 3000;
-app.listen(port, () => {
-  console.log(`App running on ${port}`);
-});
+module.exports = app;
