@@ -16,11 +16,12 @@ const { getAllTours, createTour, getTour, updateTour, deleteTour, checkId,checkB
 
 // app.delete("/api/v1/tours/:id", deleteTour);
 
-router.param("id", checkId);
+// router.param("id", checkId);
 
 // CREATE chackbody middleware check body contians name and price property if not send 400 add it in post handler stack
 
-router.route("/").get(getAllTours).post(checkBody,createTour);
+// router.route("/").get(getAllTours).post(checkBody,createTour); with json file for add middleware in post handler stack for validation 
+router.route("/").get(getAllTours).post(createTour);
 router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
 
 module.exports = router;

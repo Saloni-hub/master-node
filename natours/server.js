@@ -13,7 +13,6 @@ mongoose.connect(DB)
   .then(() => console.log("DB connected ✅"))
   .catch(err => console.error("ERROR:", err));
 
-// console.log(process.env);
 
 app.listen(port, () => {
   console.log(`App running on ${port}`);
